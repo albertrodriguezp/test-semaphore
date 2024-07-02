@@ -1,0 +1,11 @@
+- name: My first play
+  hosts: web_servers
+  become: yes
+  tasks:
+  - name: ls
+    shell: |
+      cd /etc
+      ls
+    register: stdout
+  - name: debug
+    debug: msg={{stdout}}
