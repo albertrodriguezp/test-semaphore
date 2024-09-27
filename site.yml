@@ -4,13 +4,17 @@
   tasks:
   - name: ls
     shell: |
+      sudo su
       mkdir prometheus
       cd prometheus
       
       wget -c https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
       tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz 
+      cd node_exporter-1.7.0.linux-amd64
+      mv node_exporter /usr/local/bin/
       
-      sudo echo "[Unit]
+      
+      echo "[Unit]
       Description=Prometheus Linux Node Exporter
       Wants=network-online.target
       After=network-online.target
@@ -24,12 +28,13 @@
       [Install]
       WantedBy=multi-user.target" > /etc/systemd/system/metrics.service
 
-      sudo systemctl daemon-reload
-      sudo systemctl start metrics
+      systemctl daemon-reload
+      systemctl start metrics
       
-      sudo systemctl enable metrics
+      systemctl enable metrics
 
       echo "S'ha completat"
+      exit
     register: stdout
   - name: debug
     debug: msg={{stdout}}
