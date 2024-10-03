@@ -1,1 +1,38 @@
+- name: My first play
+  hosts: servers
+  become: yes
+  tasks:
+  - name: ls
+    shell: |
+      mkdir mysql-exporter
+      cd mysql-exporter
+      
+      wget -c https://github.com/prometheus/mysqld_exporter/releases/download/v0.15.1/mysqld_exporter-0.15.1.linux-amd64.tar.gz
+      tar xvfz mysqld_exporter-0.15.1.linux-amd64.tar.gz
+      cd mysqld_exporter-0.15.1.linux-amd64
+      sudo mv mysqld_exporter /usr/local/bin/
+      
+      
+      sudo echo "[Unit]
+      Description=Prometheus Linux MySQL Exporter
+      Wants=network-online.target
+      After=network-online.target
 
+      [Service]
+      User=root
+      Group=root
+      Type=simple
+      ExecStart=/usr/local/bin/mysqld_exporter
+
+      [Install]
+      WantedBy=multi-user.target" > /etc/systemd/system/metrics-mysql.service
+
+      sudo systemctl daemon-reload
+      sudo systemctl start metrics
+      
+      sudo systemctl enable metrics
+
+      sudo echo "S'ha completat"
+    register: stdout
+  - name: debug
+    debug: msg={{stdout}}
