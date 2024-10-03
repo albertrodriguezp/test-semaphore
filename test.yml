@@ -4,7 +4,38 @@
   tasks:
   - name: ls
     shell: |
+      scp downloads@ansible-pre:/home/downloads/prometheus.tar.gz ./
+      sudo tar xvfz prometheus.tar.gz -C /etc
+      
+      mkdir node-exporter
+      cd node-exporter
+      
       wget -c https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+      tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz 
+      cd node_exporter-1.7.0.linux-amd64
+      sudo mv node_exporter /usr/local/bin/
+      
+      
+      sudo echo "[Unit]
+      Description=Prometheus Linux Node Exporter
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=root
+      Group=root
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter --web.config.file=/etc/prometheus/web.yml
+
+      [Install]
+      WantedBy=multi-user.target" > /etc/systemd/system/metrics.service
+
+      sudo systemctl daemon-reload
+      sudo systemctl start metrics
+      
+      sudo systemctl enable metrics
+
+      sudo echo "S'ha completat"
     register: stdout
   - name: debug
     debug: msg={{stdout}}
