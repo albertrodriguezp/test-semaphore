@@ -11,21 +11,42 @@
       tar xvfz mysqld_exporter-0.15.1.linux-amd64.tar.gz
       cd mysqld_exporter-0.15.1.linux-amd64
       sudo mv mysqld_exporter /usr/local/bin/
-      
+
+      sudo echo "[client]
+      user=exporter
+      password=Estabanell2024" > /etc/.mysqld_exporter.cnf
       
       sudo echo "[Unit]
       Description=Prometheus Linux MySQL Exporter
       Wants=network-online.target
       After=network-online.target
-
+      
       [Service]
       User=root
       Group=root
       Type=simple
-      ExecStart=/usr/local/bin/mysqld_exporter
+      ExecStart=/usr/local/bin/mysqld_exporter \
+      --config.my-cnf /etc/.mysqld_exporter.cnf \
+      --collect.global_status \
+      --collect.info_schema.innodb_metrics \
+      --collect.auto_increment.columns \
+      --collect.info_schema.processlist \
+      --collect.binlog_size \
+      --collect.info_schema.tablestats \
+      --collect.global_variables \
+      --collect.info_schema.query_response_time \
+      --collect.info_schema.userstats \
+      --collect.info_schema.tables \
+      --collect.perf_schema.tablelocks \
+      --collect.perf_schema.file_events \
+      --collect.perf_schema.eventswaits \
+      --collect.perf_schema.indexiowaits \
+      --collect.perf_schema.tableiowaits \
+      --collect.slave_status \
+      --web.listen-address=0.0.0.0:9104
 
       [Install]
-      WantedBy=multi-user.target" > /etc/systemd/system/metrics-mysql.service
+      WantedBy=multi-user.target > /etc/systemd/system/metrics-mysql.service
 
       sudo systemctl daemon-reload
       sudo systemctl start metrics-mysql
