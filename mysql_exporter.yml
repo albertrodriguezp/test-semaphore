@@ -1,8 +1,8 @@
-- name: My first play
+- name: mysql_exporter
   hosts: servers
   become: yes
   tasks:
-  - name: ls
+  - name: mysql_exporter
     shell: |
       mkdir mysql-exporter
       cd mysql-exporter
