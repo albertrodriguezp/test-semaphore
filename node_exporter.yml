@@ -1,8 +1,8 @@
-- name: My first play
+- name: node_exporter
   hosts: servers
   become: yes
   tasks:
-  - name: ls
+  - name: node_exporter
     shell: |
       scp downloads@ansible-pre:/home/downloads/prometheus.tar.gz ./
       sudo tar xvfz prometheus.tar.gz -C /etc
