@@ -46,7 +46,7 @@
       --web.listen-address=0.0.0.0:9104
 
       [Install]
-      WantedBy=multi-user.target > /etc/systemd/system/metrics-mysql.service
+      WantedBy=multi-user.target" > /etc/systemd/system/metrics-mysql.service
 
       sudo systemctl daemon-reload
       sudo systemctl start metrics-mysql
