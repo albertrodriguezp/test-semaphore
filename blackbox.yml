@@ -1,0 +1,38 @@
+- name: node_exporter
+  hosts: servers
+  become: yes
+  tasks:
+  - name: node_exporter
+    shell: |
+    
+      wget -c https://github.com/prometheus/blackbox_exporter/releases/download/v0.25.0/blackbox_exporter-0.25.0.linux-amd64.tar.gz
+      tar xvfz blackbox_exporter-0.25.0.linux-amd64.tar.gz
+      cd blackbox_exporter-0.25.0.linux-amd64
+      sudo mkdir /etc/blackbox
+      sudo cp blackbox.yml /etc/blackbox/
+      sudo mv blackbox_exporter /usr/local/bin/
+      
+      
+      sudo echo "[Unit]
+      Description=Prometheus Blackbox Exporter
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=root
+      Group=root
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter --web.config.file=/etc/blackbox/blackbox.yml
+
+      [Install]
+      WantedBy=multi-user.target" > /etc/systemd/system/metrics-blackbox.service
+
+      sudo systemctl daemon-reload
+      sudo systemctl start metrics-blackbox
+      
+      sudo systemctl enable metrics-blackbox
+
+      sudo echo "S'ha completat"
+    register: stdout
+  - name: debug
+    debug: msg={{stdout}}
