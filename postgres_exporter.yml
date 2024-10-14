@@ -4,36 +4,37 @@
   tasks:
   - name: postgres_exporter
     shell: |
-      scp downloads@ansible-pre:/home/downloads/prometheus.tar.gz ./
-      sudo tar xvfz prometheus.tar.gz -C /etc
-      
       mkdir node-exporter
       cd node-exporter
       
-      wget -c https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
-      tar xvfz node_exporter-1.7.0.linux-amd64.tar.gz 
-      cd node_exporter-1.7.0.linux-amd64
-      sudo mv node_exporter /usr/local/bin/
+      wget https://github.com/prometheus-community/postgres_exporter/releases/download/v0.15.0/postgres_exporter-0.15.0.linux-amd64.tar.gz
+      tar xzvf postgres_exporter-0.15.0.linux-amd64.tar.gz
+      cd postgres_exporter-0.15.0.linux-amd64/
+      sudo cp postgres_exporter /usr/local/bin/
       
+      sudo mkdir -p /opt/postgres_exporter
+      sudo echo "DATA_SOURCE_NAME=\"postgresql://prometheus:Estabanell2024@timescale-pre:5432/?sslmode=disable\"" > /opt/postgres_exporter.env
       
       sudo echo "[Unit]
-      Description=Prometheus Linux Node Exporter
+      Description=Prometheus exporter for Postgresql
       Wants=network-online.target
       After=network-online.target
 
       [Service]
       User=root
       Group=root
-      Type=simple
-      ExecStart=/usr/local/bin/node_exporter --web.config.file=/etc/prometheus/web.yml
-
+      WorkingDirectory=/opt/postgres_exporter
+      EnvironmentFile=/opt/postgres_exporter/postgres_exporter.env
+      ExecStart=/usr/local/bin/postgres_exporter --web.listen-address=:9187 --web.telemetry-path=/metrics
+      Restart=always
+      
       [Install]
-      WantedBy=multi-user.target" > /etc/systemd/system/metrics.service
+      WantedBy=multi-user.target" > /etc/systemd/system/metrics-postgres.service
 
       sudo systemctl daemon-reload
-      sudo systemctl start metrics
+      sudo systemctl start metrics-postgres.service
       
-      sudo systemctl enable metrics
+      sudo systemctl enable metrics-postgres.service
 
       sudo echo "S'ha completat"
     register: stdout
